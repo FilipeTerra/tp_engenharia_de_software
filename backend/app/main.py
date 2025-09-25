@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.adapters.api import artigo_router
+from app.adapters.api import artigo_router, evento_router
 from app.core.config import settings # <-- IMPORTAR
 
 app = FastAPI(
@@ -9,6 +9,7 @@ app = FastAPI(
 )
 
 app.include_router(artigo_router.router, prefix="/api")
+app.include_router(evento_router.router, prefix="/api")
 
 @app.get("/")
 def read_root():

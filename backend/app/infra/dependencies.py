@@ -12,7 +12,10 @@ from app.domain.repositories.i_evento_repository import IEventoRepository
 # Importe as outras interfaces aqui...
 
 # --- Importa as IMPLEMENTAÇÕES CONCRETAS dos adaptadores ---
-from app.adapters.repository.sqlite_repository import SQLiteArtigoRepository
+from app.adapters.repository.sqlite_repository import (
+    SQLiteArtigoRepository,
+    SQLiteEventoRepository,
+)
 # Para um projeto completo, você criaria e importaria as outras implementações:
 # from app.adapters.repositories.sqlite_evento_repository import SQLiteEventoRepository
 # ...e assim por diante.
@@ -38,8 +41,8 @@ def get_artigo_repository(db: Session = Depends(get_db)) -> IArtigoRepository:
 # Para completar a arquitetura, você criaria provedores para os outros repositórios.
 # Mesmo que as classes concretas ainda não existam, o padrão seria este:
 
-# def get_evento_repository(db: Session = Depends(get_db)) -> IEventoRepository:
-#     """Provedor de dependência para o repositório de Eventos."""
-#     return SQLiteEventoRepository(db)
+def get_evento_repository(db: Session = Depends(get_db)) -> IEventoRepository:
+    """Provedor de dependência para o repositório de Eventos."""
+    return SQLiteEventoRepository(db)
 
 # ...e assim por diante para cada repositório da sua aplicação.

@@ -7,6 +7,8 @@ from sqlalchemy import Column, Integer, String
 # Importações da Arquitetura Limpa
 from app.domain.entities.artigo import Artigo as ArtigoEntity
 from app.domain.repositories.i_artigo_repository import IArtigoRepository
+from app.domain.entities.evento import Evento as EventoEntity
+from app.domain.repositories.i_evento_repository import IEventoRepository
 from app.infra.database import Base
 
 # 1. MODELO DA TABELA (SQLAlchemy)
@@ -85,6 +87,70 @@ class SQLiteArtigoRepository(IArtigoRepository):
 
     def delete(self, artigo_id: int) -> None:
         model = self.db_session.query(ArtigoModel).filter(ArtigoModel.id == artigo_id).first()
+        if model:
+            self.db_session.delete(model)
+            self.db_session.commit()
+
+
+# 3. MODELO DA TABELA (SQLAlchemy) - Evento
+class EventoModel(Base):
+    __tablename__ = 'eventos'
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, index=True)
+    sigla = Column(String, unique=True, index=True, nullable=True)
+    descricao = Column(String, nullable=True)
+    site_oficial = Column(String, nullable=True)
+
+
+# 4. IMPLEMENTAÇÃO DO REPOSITÓRIO - Evento
+class SQLiteEventoRepository(IEventoRepository):
+    def __init__(self, db_session: Session):
+        self.db_session = db_session
+
+    def _to_entity(self, model: EventoModel) -> EventoEntity:
+        """Converte um modelo SQLAlchemy para uma entidade de domínio Pydantic."""
+        return EventoEntity.from_orm(model)
+
+    def save(self, evento: EventoEntity) -> EventoEntity:
+        """
+        Salva um novo evento. O mapeamento aqui inclui todos os campos
+        da entidade para o modelo do banco de dados.
+        """
+        evento_model = EventoModel(
+            id=evento.id,
+            nome=evento.nome,
+            sigla=evento.sigla,
+            descricao=evento.descricao,
+            site_oficial=str(evento.site_oficial) if evento.site_oficial else None
+        )
+        if evento.id:
+            self.db_session.merge(evento_model)
+        else:
+            self.db_session.add(evento_model)
+
+        self.db_session.commit()
+        self.db_session.refresh(evento_model)
+        return self._to_entity(evento_model)
+
+    def find_by_id(self, evento_id: int) -> Optional[EventoEntity]:
+        model = self.db_session.query(EventoModel).filter(EventoModel.id == evento_id).first()
+        return self._to_entity(model) if model else None
+
+    def find_by_sigla(self, sigla: str) -> Optional[EventoEntity]:
+        model = self.db_session.query(EventoModel).filter(EventoModel.sigla == sigla).first()
+        return self._to_entity(model) if model else None
+
+    def find_by_nome(self, nome: str) -> List[EventoEntity]:
+        query_result = self.db_session.query(EventoModel).filter(EventoModel.nome.contains(nome)).all()
+        return [self._to_entity(evento) for evento in query_result]
+
+    def find_all(self) -> List[EventoEntity]:
+        query_result = self.db_session.query(EventoModel).all()
+        return [self._to_entity(evento) for evento in query_result]
+
+    def delete(self, evento_id: int) -> None:
+        model = self.db_session.query(EventoModel).filter(EventoModel.id == evento_id).first()
         if model:
             self.db_session.delete(model)
             self.db_session.commit()
