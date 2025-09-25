@@ -95,6 +95,14 @@ const GerenciarEventosPage: FC = () => {
                             <label className="label"><span className="label-text">Sigla</span></label>
                             <input type="text" placeholder="Sigla" className="input input-bordered" value={sigla} onChange={(e) => setSigla(e.target.value)} />
                         </div>
+                        <div className="form-control">
+                            <label className="label"><span className="label-text">Descrição</span></label>
+                            <textarea placeholder="Descrição" className="textarea textarea-bordered" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+                        </div>
+                        <div className="form-control">
+                            <label className="label"><span className="label-text">Site Oficial</span></label>
+                            <input type="url" placeholder="https://example.com" className="input input-bordered" value={siteOficial} onChange={(e) => setSiteOficial(e.target.value)} />
+                        </div>
                         <div className="card-actions justify-end mt-4">
                             <button type="submit" className="btn btn-primary">Salvar</button>
                         </div>
@@ -110,6 +118,8 @@ const GerenciarEventosPage: FC = () => {
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Sigla</th>
+                            <th>Descrição</th>
+                            <th>Site Oficial</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -119,6 +129,8 @@ const GerenciarEventosPage: FC = () => {
                                 <th>{evento.id}</th>
                                 <td>{evento.nome}</td>
                                 <td>{evento.sigla}</td>
+                                <td>{evento.descricao}</td>
+                                <td><a href={evento.site_oficial} target="_blank" rel="noopener noreferrer">{evento.site_oficial}</a></td>
                                 <td>
                                     <button onClick={() => openEditModal(evento)} className="btn btn-sm btn-info mr-2">Editar</button>
                                     <button onClick={() => handleDeletarEvento(evento.id!)} className="btn btn-sm btn-error">Deletar</button>
@@ -142,6 +154,14 @@ const GerenciarEventosPage: FC = () => {
                             <div className="form-control">
                                 <label className="label"><span className="label-text">Sigla</span></label>
                                 <input type="text" className="input input-bordered" value={editingEvento.sigla || ''} onChange={(e) => setEditingEvento({...editingEvento, sigla: e.target.value})} />
+                            </div>
+                            <div className="form-control">
+                                <label className="label"><span className="label-text">Descrição</span></label>
+                                <textarea className="textarea textarea-bordered" value={editingEvento.descricao || ''} onChange={(e) => setEditingEvento({...editingEvento, descricao: e.target.value})} />
+                            </div>
+                            <div className="form-control">
+                                <label className="label"><span className="label-text">Site Oficial</span></label>
+                                <input type="url" className="input input-bordered" value={editingEvento.site_oficial || ''} onChange={(e) => setEditingEvento({...editingEvento, site_oficial: e.target.value})} />
                             </div>
                             <div className="modal-action">
                                 <button type="submit" className="btn btn-primary">Salvar</button>
