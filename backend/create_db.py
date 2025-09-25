@@ -1,5 +1,5 @@
 from app.infra.database import Base, engine
-from app.adapters.repository.sqlite_repository import ArtigoModel, EventoModel
+from app.adapters.repository.sqlite_repository import ArtigoModel, EventoModel, EdicaoEventoModel
 
 def init_db():
     print("Criando tabelas no banco de dados...")
