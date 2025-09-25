@@ -1,4 +1,5 @@
 import React, { useState, useEffect, FC, FormEvent } from 'react';
+import GerenciadorDeEdicoes from '../components/GerenciadorDeEdicoes';
 import {
     listarEventos,
     criarEvento,
@@ -15,8 +16,9 @@ type Notification = {
 
 const GerenciarEventosPage: FC = () => {
     const [eventos, setEventos] = useState<Evento[]>([]);
-    const [novoEvento, setNovoEvento] = useState<Omit<Evento, 'id'>>({ nome: '', sigla: '', descricao: '', site_oficial: '' });
+    const [novoEvento, setNovoEvento] = useState<Omit<Evento, 'id'>>({ nome: '', sigla: '', descricao: '', site_oficial: '', entidade_promotora: '' });
     const [editingEvento, setEditingEvento] = useState<Evento | null>(null);
+    const [expandedEventoId, setExpandedEventoId] = useState<number | null>(null);
     
     // 1. Estado para controlar as notificações
     const [notification, setNotification] = useState<Notification>({ message: '', type: '' });
@@ -47,7 +49,7 @@ const GerenciarEventosPage: FC = () => {
         try {
             const eventoCriado = await criarEvento(novoEvento);
             setEventos([...eventos, eventoCriado]);
-            setNovoEvento({ nome: '', sigla: '', descricao: '', site_oficial: '' }); // Limpa o formulário
+            setNovoEvento({ nome: '', sigla: '', descricao: '', site_oficial: '', entidade_promotora: '' }); // Limpa o formulário
             showNotification('Salvo com Sucesso', 'success'); // 2. Mensagem de sucesso
         } catch (error) {
             console.error('Erro ao criar evento:', error);
@@ -89,6 +91,10 @@ const GerenciarEventosPage: FC = () => {
     const openEditModal = (evento: Evento) => setEditingEvento(evento);
     const closeEditModal = () => setEditingEvento(null);
 
+    const toggleEdicoes = (id: number) => {
+        setExpandedEventoId(expandedEventoId === id ? null : id);
+    };
+
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Gerenciar Eventos</h1>
@@ -122,6 +128,10 @@ const GerenciarEventosPage: FC = () => {
                             <label className="label"><span className="label-text">Site Oficial</span></label>
                             <input type="url" placeholder="https://example.com" className="input input-bordered" value={novoEvento.site_oficial || ''} onChange={(e) => setNovoEvento({...novoEvento, site_oficial: e.target.value})} />
                         </div>
+                        <div className="form-control">
+                            <label className="label"><span className="label-text">Entidade Promotora</span></label>
+                            <input type="text" placeholder="Entidade Promotora" className="input input-bordered" value={novoEvento.entidade_promotora || ''} onChange={(e) => setNovoEvento({...novoEvento, entidade_promotora: e.target.value})} />
+                        </div>
                         <div className="card-actions justify-end mt-4">
                             <button type="submit" className="btn btn-primary">Salvar</button>
                         </div>
@@ -135,23 +145,40 @@ const GerenciarEventosPage: FC = () => {
                     {/* ... O conteúdo da tabela continua o mesmo ... */}
                     <thead>
                         <tr>
+                            <th></th>
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Sigla</th>
+                            <th>Entidade Promotora</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {eventos.map((evento) => (
-                            <tr key={evento.id}>
-                                <th>{evento.id}</th>
-                                <td>{evento.nome}</td>
-                                <td>{evento.sigla}</td>
-                                <td>
-                                    <button onClick={() => openEditModal(evento)} className="btn btn-sm btn-info mr-2">Editar</button>
-                                    <button onClick={() => handleDeletarEvento(evento.id!)} className="btn btn-sm btn-error">Deletar</button>
-                                </td>
-                            </tr>
+                            <React.Fragment key={evento.id}>
+                                <tr>
+                                    <td>
+                                        <button onClick={() => toggleEdicoes(evento.id!)} className="btn btn-sm btn-circle">
+                                            {expandedEventoId === evento.id ? '▼' : '►'}
+                                        </button>
+                                    </td>
+                                    <th>{evento.id}</th>
+                                    <td>{evento.nome}</td>
+                                    <td>{evento.sigla}</td>
+                                    <td>{evento.entidade_promotora}</td>
+                                    <td>
+                                        <button onClick={() => openEditModal(evento)} className="btn btn-sm btn-info mr-2">Editar</button>
+                                        <button onClick={() => handleDeletarEvento(evento.id!)} className="btn btn-sm btn-error">Deletar</button>
+                                    </td>
+                                </tr>
+                                {expandedEventoId === evento.id && (
+                                    <tr>
+                                        <td colSpan={6}>
+                                            <GerenciadorDeEdicoes eventoId={evento.id!} />
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
                         ))}
                     </tbody>
                 </table>
@@ -178,6 +205,10 @@ const GerenciarEventosPage: FC = () => {
                             <div className="form-control">
                                 <label className="label"><span className="label-text">Site Oficial</span></label>
                                 <input type="url" className="input input-bordered" value={editingEvento.site_oficial || ''} onChange={(e) => setEditingEvento({...editingEvento, site_oficial: e.target.value})} />
+                            </div>
+                            <div className="form-control">
+                                <label className="label"><span className="label-text">Entidade Promotora</span></label>
+                                <input type="text" className="input input-bordered" value={editingEvento.entidade_promotora || ''} onChange={(e) => setEditingEvento({...editingEvento, entidade_promotora: e.target.value})} />
                             </div>
                             <div className="modal-action">
                                 <button type="button" onClick={closeEditModal} className="btn">Cancelar</button>

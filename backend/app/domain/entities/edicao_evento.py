@@ -12,3 +12,13 @@ class EdicaoEvento(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class EdicaoEventoCreate(BaseModel):
+    ano: int = Field(..., gt=1950, description="Ano de realização da edição")
+    local: Optional[str] = Field(None, description="Local onde a edição ocorreu")
+
+
+class EdicaoEventoUpdate(BaseModel):
+    ano: Optional[int] = Field(None, gt=1950, description="Ano de realização da edição")
+    local: Optional[str] = Field(None, description="Local onde a edição ocorreu")
