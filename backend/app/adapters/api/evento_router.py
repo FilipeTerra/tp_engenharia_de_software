@@ -48,7 +48,7 @@ def update_evento(
         raise HTTPException(status_code=400, detail="ID do evento no corpo não corresponde ao ID na URL")
 
     evento.id = evento_id # Garante que o ID correto seja usado na atualização
-    updated_evento = repo.save(evento)
+    updated_evento = repo.update(evento)
     return updated_evento
 
 @router.delete("/{evento_id}", status_code=status.HTTP_204_NO_CONTENT)

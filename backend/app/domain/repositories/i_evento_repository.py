@@ -9,6 +9,11 @@ class IEventoRepository(ABC):
     def save(self, evento: Evento) -> Evento:
         """Salva um evento (cria um novo ou atualiza um existente)."""
         pass
+    
+    @abstractmethod
+    def update(self, evento: Evento) -> Evento:
+        """Atualiza um evento existente."""
+        pass
 
     @abstractmethod
     def find_by_id(self, evento_id: int) -> Optional[Evento]:

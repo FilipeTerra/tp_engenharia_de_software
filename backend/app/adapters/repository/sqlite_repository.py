@@ -154,3 +154,15 @@ class SQLiteEventoRepository(IEventoRepository):
         if model:
             self.db_session.delete(model)
             self.db_session.commit()
+
+    def update(self, evento: EventoEntity) -> EventoEntity:
+        evento_model = self.db_session.query(EventoModel).filter(EventoModel.id == evento.id).first()
+        if evento_model:
+            evento_model.nome = evento.nome
+            evento_model.sigla = evento.sigla
+            evento_model.descricao = evento.descricao
+            evento_model.site_oficial = evento.site_oficial
+            self.db_session.commit()
+            self.db_session.refresh(evento_model)
+            return self._to_entity(evento_model)
+        return None # Ou lançar uma exceção
