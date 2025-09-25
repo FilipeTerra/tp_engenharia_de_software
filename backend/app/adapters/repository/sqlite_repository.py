@@ -9,6 +9,8 @@ from app.domain.entities.artigo import Artigo as ArtigoEntity
 from app.domain.repositories.i_artigo_repository import IArtigoRepository
 from app.domain.entities.evento import Evento as EventoEntity
 from app.domain.repositories.i_evento_repository import IEventoRepository
+from app.domain.entities.edicao_evento import EdicaoEvento as EdicaoEventoEntity
+from app.domain.repositories.i_edicao_evento_repository import IEdicaoEventoRepository
 from app.infra.database import Base
 
 # 1. MODELO DA TABELA (SQLAlchemy)
@@ -101,6 +103,7 @@ class EventoModel(Base):
     sigla = Column(String, unique=True, index=True, nullable=True)
     descricao = Column(String, nullable=True)
     site_oficial = Column(String, nullable=True)
+    entidade_promotora = Column(String, nullable=True)
 
 
 # 4. IMPLEMENTAÇÃO DO REPOSITÓRIO - Evento
@@ -122,7 +125,8 @@ class SQLiteEventoRepository(IEventoRepository):
             nome=evento.nome,
             sigla=evento.sigla,
             descricao=evento.descricao,
-            site_oficial=str(evento.site_oficial) if evento.site_oficial else None
+            site_oficial=str(evento.site_oficial) if evento.site_oficial else None,
+            entidade_promotora=evento.entidade_promotora
         )
         if evento.id:
             self.db_session.merge(evento_model)
@@ -162,7 +166,64 @@ class SQLiteEventoRepository(IEventoRepository):
             evento_model.sigla = evento.sigla
             evento_model.descricao = evento.descricao
             evento_model.site_oficial = evento.site_oficial
+            evento_model.entidade_promotora = evento.entidade_promotora
             self.db_session.commit()
             self.db_session.refresh(evento_model)
             return self._to_entity(evento_model)
         return None # Ou lançar uma exceção
+
+
+# 5. MODELO DA TABELA (SQLAlchemy) - EdicaoEvento
+class EdicaoEventoModel(Base):
+    __tablename__ = 'edicoes_evento'
+
+    id = Column(Integer, primary_key=True, index=True)
+    ano = Column(Integer, nullable=False)
+    local = Column(String, nullable=True)
+    id_evento = Column(Integer, nullable=False)
+
+
+# 6. IMPLEMENTAÇÃO DO REPOSITÓRIO - EdicaoEvento
+class SQLiteEdicaoEventoRepository(IEdicaoEventoRepository):
+    def __init__(self, db_session: Session):
+        self.db_session = db_session
+
+    def _to_entity(self, model: EdicaoEventoModel) -> EdicaoEventoEntity:
+        """Converte um modelo SQLAlchemy para uma entidade de domínio Pydantic."""
+        return EdicaoEventoEntity.from_orm(model)
+
+    def save(self, edicao_evento: EdicaoEventoEntity) -> EdicaoEventoEntity:
+        """Salva uma nova edição de evento."""
+        edicao_model = EdicaoEventoModel(
+            ano=edicao_evento.ano,
+            local=edicao_evento.local,
+            id_evento=edicao_evento.id_evento
+        )
+        self.db_session.add(edicao_model)
+        self.db_session.commit()
+        self.db_session.refresh(edicao_model)
+        return self._to_entity(edicao_model)
+
+    def find_by_id(self, edicao_id: int) -> Optional[EdicaoEventoEntity]:
+        model = self.db_session.query(EdicaoEventoModel).filter(EdicaoEventoModel.id == edicao_id).first()
+        return self._to_entity(model) if model else None
+
+    def find_by_evento_id(self, evento_id: int) -> List[EdicaoEventoEntity]:
+        query_result = self.db_session.query(EdicaoEventoModel).filter(EdicaoEventoModel.id_evento == evento_id).all()
+        return [self._to_entity(edicao) for edicao in query_result]
+
+    def delete(self, edicao_id: int) -> None:
+        model = self.db_session.query(EdicaoEventoModel).filter(EdicaoEventoModel.id == edicao_id).first()
+        if model:
+            self.db_session.delete(model)
+            self.db_session.commit()
+
+    def update(self, edicao_evento: EdicaoEventoEntity) -> EdicaoEventoEntity:
+        edicao_model = self.db_session.query(EdicaoEventoModel).filter(EdicaoEventoModel.id == edicao_evento.id).first()
+        if edicao_model:
+            edicao_model.ano = edicao_evento.ano
+            edicao_model.local = edicao_evento.local
+            self.db_session.commit()
+            self.db_session.refresh(edicao_model)
+            return self._to_entity(edicao_model)
+        return None

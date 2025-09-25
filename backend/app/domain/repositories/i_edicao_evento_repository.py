@@ -26,3 +26,8 @@ class IEdicaoEventoRepository(ABC):
     def delete(self, edicao_id: int) -> None:
         """Deleta uma edição de evento pelo seu ID."""
         pass
+
+    @abstractmethod
+    def update(self, edicao_evento: EdicaoEvento) -> EdicaoEvento:
+        """Atualiza uma edição de evento."""
+        pass

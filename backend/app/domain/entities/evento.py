@@ -10,6 +10,7 @@ class Evento(BaseModel):
     sigla: Optional[str] = Field(None, description="Sigla do evento, ex: SBES")
     descricao: Optional[str] = Field(None, description="Breve descrição do evento")
     site_oficial: Optional[str] = Field(None, description="URL do site oficial do evento")
+    entidade_promotora: Optional[str] = Field(None, description="Entidade promotora do evento")
 
     class Config:
         from_attributes = True

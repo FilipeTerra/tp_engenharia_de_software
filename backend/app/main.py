@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.adapters.api import artigo_router, evento_router
+from app.adapters.api import artigo_router, evento_router, edicao_evento_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(artigo_router.router, prefix="/api")
 app.include_router(evento_router.router, prefix="/api")
+app.include_router(edicao_evento_router.router, prefix="/api")
 
 @app.get("/")
 def read_root():
