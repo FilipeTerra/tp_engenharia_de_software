@@ -6,7 +6,6 @@ from app.domain.repositories.i_edicao_evento_repository import IEdicaoEventoRepo
 from app.infra.dependencies import get_edicao_evento_repository
 
 router = APIRouter(
-    prefix="/api",
     tags=["Edições de Eventos"],
 )
 
